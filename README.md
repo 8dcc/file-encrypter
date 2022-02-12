@@ -14,7 +14,7 @@ File                 | Description
 ---------------------|-------------------
 `encrypt.c`          | For encrypting and decrpyting files.
 `Misc/encode.c`      | Apply caesar cipher with the specified OFFSET.
-`Misc/get_values.c`  | Prints the values in `int` and `char` from a file (./get_values.o < file.txt). Useful for debugging.
+`Misc/get_values.c`  | Prints the values in `int` and `char` from a file (`./get_values.o < file.txt`). Useful for debugging.
 
 ## Todo
 - [ ] For some reason some passwords are not read (I assume) correctly. For example 'TEST123'.
