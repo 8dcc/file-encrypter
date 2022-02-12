@@ -5,9 +5,11 @@
 #include<stdio.h>
 
 #define MAX_OFFSET 500
+#define MAX_MAC_OFFSET 255
+#define DEBUG_PRINT 1		// 0 - off
 
 unsigned long offset_from_str(char str[]);
-unsigned int mac_from_str(char str[]);
+unsigned long mac_from_str(char str[]);
 int encrypt();
 int decrypt();
 
@@ -45,7 +47,6 @@ int main() {
 
 int encrypt() {
     char filename[100], password[100], c;
-	unsigned int mac = 0;
     FILE *original_file, *output_file;
 
     printf("\nFilename: ");
@@ -68,10 +69,12 @@ int encrypt() {
 	}
 
 	// MAC
-	fputc(mac_from_str(password), output_file);
-	printf("%d", mac_from_str(password));
+	fputc( (mac_from_str(password) % MAX_MAC_OFFSET), output_file );
+	if (DEBUG_PRINT) {
+		printf("MAC: %d\n", (mac_from_str(password) % MAX_MAC_OFFSET));
+	}
 
-	// Get each character of the original file until EOF
+	// Get each c-haracter of the original file until EOF
     while((c = fgetc(original_file)) != EOF) {
         c = c + ( offset_from_str(password) % MAX_OFFSET );			// We add the offset to enconde our file
         fputc(c, output_file);										// We write the new char to the output file
@@ -88,7 +91,6 @@ int encrypt() {
 
 int decrypt() {
     char filename[100], password[100], c;
-	unsigned int mac = 0;
     FILE *original_file, *output_file;
 
     printf("\nFilename: ");
@@ -111,8 +113,13 @@ int decrypt() {
 	}
 
 	// MAC checking
-	if ( mac_from_str(password) != (c = fgetc(original_file)) ) {
-		printf("[%d|%d] Wrong password or invalid file.\n", mac_from_str(password), c);
+	c = fgetc(original_file);
+	if ( (mac_from_str(password) % MAX_MAC_OFFSET) != c ) {
+		if (DEBUG_PRINT) {
+			printf("[%d|%d] ", (mac_from_str(password) % MAX_MAC_OFFSET), c);
+		}
+
+		printf("Wrong password or invalid file.\n");
 		return 1;
 	}
 
@@ -141,10 +148,10 @@ unsigned long offset_from_str(char str[]) {
 
 /* --------------------------------------------------------------------------- */
 
-unsigned int mac_from_str(char str[]) {
-	unsigned int mac = 0;
+unsigned long mac_from_str(char str[]) {
+	unsigned long mac = 5381;
 	for (int n = 0; str[n] != '\0'; n++) {
-		mac = mac + str[n];
+		mac = mac + (mac * 33 + str[n]);
 	}
-	return (mac % MAX_OFFSET);
+	return mac;
 }
