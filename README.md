@@ -19,3 +19,4 @@ File                 | Description
 ## Todo
 - [ ] For some reason some passwords are not read (I assume) correctly. For example 'TEST123'.
 - [ ] Make password text hidden.
+- [ ] Move `encrypt()` and `decrypt()` to libraries.
