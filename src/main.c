@@ -4,7 +4,7 @@
 
 #include <stdio.h>
 #include "settings.h"
-#include "hashes.h"
+#include "misc.h"
 #include "encrypt.h"
 #include "decrypt.h"
 
