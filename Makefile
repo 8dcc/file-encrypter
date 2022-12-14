@@ -2,7 +2,7 @@
 CC=gcc
 CFLAGS=-Wall -Wextra
 LDFLAGS=
-LIB_OBJS=obj/lib/aes256.o
+LIB_OBJS=obj/lib/aes256.o obj/lib/md5.o
 OBJS=obj/main.o obj/encrypt.o obj/misc.o
 BIN=file-encrypter.out
 

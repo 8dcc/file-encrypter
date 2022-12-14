@@ -7,34 +7,52 @@
 #include <stdio.h>
 #include <string.h>    // For memcpy()
 
+#include "lib/md5.h"    // Need to include md5 first because of uint8_t define in aes
 #include "lib/aes256.h"
 
-#define BLOCK_SZ 16    // For readability
+#define MD5_SZ      16    // For readability (16 bytes * 2 hex chars -> 32 bytes)
+#define BLOCK_SZ    16    // For readability
 #define OUTPUT_FILE "output.txt"
 
-void encrypt_file(char* filename) {
-    // TODO: Parameter
-    // 32 bytes (256 bits)
-    const char key[] = "0123456789"
-                       "0123456789"
-                       "0123456789"
-                       "01";
+/* hash_password: Writes the md5 hash of the original string as hex into the same
+ * string. String needs to be at least 33 bytes long (32 + null terminator) */
+void hash_password(char* password) {
+    const uint8_t* hash = md5String(password);
 
-    printf("Using key: \"%s\"\n", key);
+    int i;
+    for (i = 0; i < MD5_SZ; i++)
+        sprintf(&password[i * 2], "%02x", hash[i]);
+
+    password[i * 2] = '\0';
+}
+
+/*
+ * encrypt_file:
+ *   Encrypts each 16 byte block that forms the contents of 'filename' with the
+ *   aes256 algorithm, using the md5 hash of 'password' as key for aes256. Then
+ *   appends each encrypted block into OUTPUT_FILE.
+ */
+void encrypt_file(char* filename, char* password) {
+    printf("Using md5 hash of password as key: \"%s\" -> ", password);
+
+    // The 16 bytes of the hash * 2 chars for representing each byte in hex.
+    // 16 bytes -> 32 chars -> 256 bits.
+    hash_password(password);
+
+    printf("\"%s\"\n", password);
     printf("Encrypting text from file: \"%s\" to \"%s\"\n", filename, OUTPUT_FILE);
 
-    /*----------------------------------------------------------*/
+    /*------------------------------------------------------------------------*/
 
+    // Initialize aes256 context, copy password string into the aes256_key_t struct
     aes256_context_t ctx;
 
     aes256_key_t aes_key;
-    memcpy(&aes_key, key, sizeof(aes_key));
+    memcpy(&aes_key, password, sizeof(aes_key));
 
     aes256_init(&ctx, &aes_key);
 
-    /*----------------------------------------------------------*/
-
-    // TODO: Paddings to data and key, xor excess key with itself
+    /*------------------------------------------------------------------------*/
 
     int c;
     FILE* fd = fopen(filename, "r");
@@ -83,4 +101,4 @@ void encrypt_file(char* filename) {
     fclose(output);
 }
 
-void decrypt_file(char* filename) {}
+void decrypt_file(char* filename, char* password) {}
