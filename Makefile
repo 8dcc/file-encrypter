@@ -1,7 +1,8 @@
 
 CC=gcc
-CFLAGS=-Wall
+CFLAGS=-Wall -Wextra
 LDFLAGS=
+LIB_OBJS=obj/lib/aes256.o
 OBJS=obj/main.o obj/encrypt.o obj/misc.o
 BIN=file-encrypter.out
 
@@ -14,15 +15,18 @@ run: $(BIN)
 
 # -------------------------------------------
 
-$(BIN): $(OBJS)
+$(BIN): $(OBJS) $(LIB_OBJS)
 	$(CC) -o $@ $(OBJS) $(LDFLAGS)
 
 $(OBJS): obj/%.o : src/%.c
-	@mkdir -p obj			# Don't like calling mkdir each obj but whatever
+	@mkdir -p obj		# Don't like calling mkdir each obj but whatever
 	$(CC) $(CFLAGS) -c -o $@ $< $(LDFLAGS)
 
 # -------------------------------------------
-# TODO: Lib
+
+$(LIB_OBJS): obj/lib/%.o : src/lib/%.c
+	@mkdir -p obj/lib
+	$(CC) $(CFLAGS) -c -o $@ $<
 
 # -------------------------------------------
 
