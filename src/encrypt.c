@@ -78,6 +78,7 @@ void encrypt_file(char* filename) {
         }
     }
 
+    aes256_done(&ctx);
     fclose(fd);
     fclose(output);
 }
