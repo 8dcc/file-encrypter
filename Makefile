@@ -2,7 +2,7 @@
 CC=gcc
 CFLAGS=-Wall
 LDFLAGS=
-OBJS=obj/main.o obj/misc.o obj/encrypt.o
+OBJS=obj/main.o obj/encrypt.o obj/misc.o
 BIN=file-encrypter.out
 
 .PHONY: all run clean
@@ -12,16 +12,13 @@ all: $(BIN)
 run: $(BIN)
 	./$<
 
-# obj folder
-obj:
-	mkdir -p obj
-
 # -------------------------------------------
 
 $(BIN): $(OBJS)
 	$(CC) -o $@ $(OBJS) $(LDFLAGS)
 
-$(OBJS): obj/%.o : src/%.c obj
+$(OBJS): obj/%.o : src/%.c
+	@mkdir -p obj			# Don't like calling mkdir each obj but whatever
 	$(CC) $(CFLAGS) -c -o $@ $< $(LDFLAGS)
 
 # -------------------------------------------
@@ -30,7 +27,4 @@ $(OBJS): obj/%.o : src/%.c obj
 # -------------------------------------------
 
 clean:
-	rm -f $(GAME_OBJS)
-	rm -f $(GAME_BIN)
-	rm -f $(SOLVER_OBJS)
-	rm -f $(SOLVER_BIN)
+	rm -f $(OBJS) $(BIN)
