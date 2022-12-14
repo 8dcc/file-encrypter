@@ -16,7 +16,7 @@ run: $(BIN)
 # -------------------------------------------
 
 $(BIN): $(OBJS) $(LIB_OBJS)
-	$(CC) -o $@ $(OBJS) $(LDFLAGS)
+	$(CC) -o $@ $(OBJS) $(LIB_OBJS) $(LDFLAGS)
 
 $(OBJS): obj/%.o : src/%.c
 	@mkdir -p obj		# Don't like calling mkdir each obj but whatever
