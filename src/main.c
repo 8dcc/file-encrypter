@@ -34,24 +34,15 @@ int main(int argc, char** argv) {
 
     char password[255] = { 0 };
 
-    // Clear output file and open in append mode
-    FILE* output = fopen(OUTPUT_FILE, "w");
-    if (!output)
-        die("Error. Can't open output file: \"%s\"\n", OUTPUT_FILE);
-    fclose(output);
-    output = fopen(OUTPUT_FILE, "a");
-    if (!output)
-        die("Error. Can't open output file: \"%s\"\n", OUTPUT_FILE);
-
     // Check first param
     switch (tolower(argv[1][1])) {
         case 'e':
             password_prompt(password);
-            encrypt_file(argv[2], password, output);
+            encrypt_file(argv[2], OUTPUT_FILE, password);
             break;
         case 'd':
             password_prompt(password);
-            decrypt_file(argv[2], password, output);
+            decrypt_file(argv[2], OUTPUT_FILE, password);
             break;
         default:
             die("Error. Unknown parameter: \"%s\"\n", argv[1]);

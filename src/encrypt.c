@@ -28,20 +28,15 @@ void hash_password(char* password) {
 }
 
 /*
- * encrypt_file:
- *   Encrypts each 16 byte block that forms the contents of 'filename' with the
- *   aes256 algorithm, using the md5 hash of 'password' as key for aes256. Then
- *   appends each encrypted block into the output file descriptor.
- *
- * TODO: Pass file descriptor for input instead of filename? Make wrapper for
- * encrypt_fd?
+ * encrypt_stream:
+ *   Encrypts each 16 byte block that forms the contents of 'in' with the aes256
+ *   algorithm, using the md5 hash of 'password' as key for aes256. Then appends each
+ *   encrypted block into the 'out' file descriptor.
  */
-void encrypt_file(char* filename, char* password, FILE* output) {
+void encrypt_stream(FILE* in, FILE* out, char* password) {
     // The 16 bytes of the hash * 2 chars for representing each byte in hex.
     // 16 bytes -> 32 chars -> 256 bits.
     hash_password(password);
-
-    /*------------------------------------------------------------------------*/
 
     // Initialize aes256 context, copy password string into the aes256_key_t struct
     aes256_context_t ctx;
@@ -54,13 +49,6 @@ void encrypt_file(char* filename, char* password, FILE* output) {
     /*------------------------------------------------------------------------*/
 
     int c;
-    FILE* fd = fopen(filename, "r");
-    if (!fd)
-        die("Error. Can't open input file: \"%s\"\n", filename);
-
-    // File descriptor argument for output is invalid
-    if (!output)
-        die("Error. Can't open output file.");
 
     // Data block of 16 bytes (See lib/aes256.h)
     aes256_blk_t blk;
@@ -68,14 +56,14 @@ void encrypt_file(char* filename, char* password, FILE* output) {
     // Will count the number of chars we wrote to the current block
     int cur_blk_sz = 0;
 
-    while ((c = getc(fd)) != EOF) {
+    while ((c = getc(in)) != EOF) {
         // If the block is full, encrypt and reset blk pos
         if (cur_blk_sz >= BLOCK_SZ) {
             aes256_encrypt_ecb(&ctx, &blk);
             cur_blk_sz = 0;
 
             for (int i = 0; i < BLOCK_SZ; i++) {
-                putc(blk.raw[i], output);
+                putc(blk.raw[i], out);
             }
         }
 
@@ -92,21 +80,24 @@ void encrypt_file(char* filename, char* password, FILE* output) {
         aes256_encrypt_ecb(&ctx, &blk);
         cur_blk_sz = 0;
         for (int i = 0; i < BLOCK_SZ; i++) {
-            putc(blk.raw[i], output);
+            putc(blk.raw[i], out);
         }
     }
 
     aes256_done(&ctx);
-    fclose(fd);
-    fclose(output);
+    // We will close fd's in wrapper
 }
 
-void decrypt_file(char* filename, char* password, FILE* output) {
+/*
+ * decrypt_stream:
+ *   Decrypts each 16 byte block that forms the contents of 'in' with the aes256
+ *   algorithm, using the md5 hash of 'password' as key for aes256. Then appends each
+ *   decrypted block into the 'out' file descriptor.
+ */
+void decrypt_stream(FILE* in, FILE* out, char* password) {
     // The 16 bytes of the hash * 2 chars for representing each byte in hex.
     // 16 bytes -> 32 chars -> 256 bits.
     hash_password(password);
-
-    /*------------------------------------------------------------------------*/
 
     // Initialize aes256 context, copy password string into the aes256_key_t struct
     aes256_context_t ctx;
@@ -119,13 +110,6 @@ void decrypt_file(char* filename, char* password, FILE* output) {
     /*------------------------------------------------------------------------*/
 
     int c;
-    FILE* fd = fopen(filename, "r");
-    if (!fd)
-        die("Error. Can't open input file: \"%s\"\n", filename);
-
-    // File descriptor argument for output is invalid
-    if (!output)
-        die("Error. Can't open output file.");
 
     // Data block of 16 bytes (See lib/aes256.h)
     aes256_blk_t blk;
@@ -134,7 +118,7 @@ void decrypt_file(char* filename, char* password, FILE* output) {
     int cur_blk_sz = 0;
 
     // Fill the block with encrypted bytes
-    while ((c = getc(fd)) != EOF) {
+    while ((c = getc(in)) != EOF) {
         // Write next char to block
         blk.raw[cur_blk_sz++] = c;
 
@@ -145,7 +129,7 @@ void decrypt_file(char* filename, char* password, FILE* output) {
 
             // Write the decrypted block to output but ignore null chars
             for (int i = 0; i < BLOCK_SZ && blk.raw[i] != '\0'; i++) {
-                putc(blk.raw[i], output);
+                putc(blk.raw[i], out);
             }
         }
     }
@@ -154,6 +138,49 @@ void decrypt_file(char* filename, char* password, FILE* output) {
     // aes256 encrypted text.
 
     aes256_done(&ctx);
-    fclose(fd);
-    fclose(output);
+    // We will close fd's in wrapper
 }
+
+/* Wrappers for encrypt_stream and decrypt_stream */
+void encrypt_file(char* in_filename, char* out_filename, char* password) {
+    FILE* in = fopen(in_filename, "r");
+    if (!in)
+        die("Error. Can't open input file: \"%s\"\n", in_filename);
+
+    // Clear output file
+    FILE* out = fopen(out_filename, "w");
+    if (!out)
+        die("Error. Can't open output file: \"%s\"\n", out_filename);
+    fclose(out);
+
+    out = fopen(out_filename, "a");
+    if (!out)
+        die("Error. Can't open output file: \"%s\"\n", out_filename);
+
+    encrypt_stream(in, out, password);
+
+    fclose(in);
+    fclose(out);
+}
+
+void decrypt_file(char* in_filename, char* out_filename, char* password) {
+    FILE* in = fopen(in_filename, "r");
+    if (!in)
+        die("Error. Can't open input file: \"%s\"\n", in_filename);
+
+    // Clear output file
+    FILE* out = fopen(out_filename, "w");
+    if (!out)
+        die("Error. Can't open output file: \"%s\"\n", out_filename);
+    fclose(out);
+
+    out = fopen(out_filename, "a");
+    if (!out)
+        die("Error. Can't open output file: \"%s\"\n", out_filename);
+
+    decrypt_stream(in, out, password);
+
+    fclose(in);
+    fclose(out);
+}
+
