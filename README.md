@@ -1,6 +1,9 @@
 # File encrypter
 
-**C program for encrypting/decrypting files using aes256.**
+**C program (and tiny lib/wrapper) for encrypting/decrypting files using aes256.**
+
+The [`src/encrypt.c`](src/encrypt.c) file is made so you can use it in other
+programs, simply copy `src/encrypt.*`, `src/misc.*`, `src/lib/` to your project.
 
 Feel free to PR.
 
