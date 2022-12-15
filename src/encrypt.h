@@ -1,3 +1,8 @@
+/*
+ * Functions for hashing, encrypting and decrypting text.
+ *
+ * https://github.com/r4v10l1/file-encrypter
+ */
 
 void hash_password(char* password);
 
