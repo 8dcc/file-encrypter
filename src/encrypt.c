@@ -1,5 +1,5 @@
 /*
- * Functions for encrypting and decrypting text.
+ * Functions for hashing, encrypting and decrypting text.
  *
  * https://github.com/r4v10l1/file-encrypter
  */
@@ -101,4 +101,63 @@ void encrypt_file(char* filename, char* password) {
     fclose(output);
 }
 
-void decrypt_file(char* filename, char* password) {}
+void decrypt_file(char* filename, char* password) {
+    printf("Using md5 hash of password as key: \"%s\" -> ", password);
+
+    // The 16 bytes of the hash * 2 chars for representing each byte in hex.
+    // 16 bytes -> 32 chars -> 256 bits.
+    hash_password(password);
+
+    printf("\"%s\"\n", password);
+    printf("Encrypting text from file: \"%s\" to \"%s\"\n", filename, OUTPUT_FILE);
+
+    /*------------------------------------------------------------------------*/
+
+    // Initialize aes256 context, copy password string into the aes256_key_t struct
+    aes256_context_t ctx;
+
+    aes256_key_t aes_key;
+    memcpy(&aes_key, password, sizeof(aes_key));
+
+    aes256_init(&ctx, &aes_key);
+
+    /*------------------------------------------------------------------------*/
+
+    int c;
+    FILE* fd = fopen(filename, "r");
+
+    // Clear output file and open in append mode
+    FILE* output = fopen(OUTPUT_FILE, "w");
+    fclose(output);
+    output = fopen(OUTPUT_FILE, "a");
+
+    // Data block of 16 bytes (See lib/aes256.h)
+    aes256_blk_t blk;
+
+    // Will count the number of chars we wrote to the current block
+    int cur_blk_sz = 0;
+
+    // Fill the block with encrypted bytes
+    while ((c = getc(fd)) != EOF) {
+        // Write next char to block
+        blk.raw[cur_blk_sz++] = c;
+
+        // If the block is full, decrypt and reset blk pos
+        if (cur_blk_sz >= BLOCK_SZ) {
+            aes256_decrypt_ecb(&ctx, &blk);
+            cur_blk_sz = 0;
+
+            // Write the decrypted block to output but ignore null chars
+            for (int i = 0; i < BLOCK_SZ && blk.raw[i] != '\0'; i++) {
+                putc(blk.raw[i], output);
+            }
+        }
+    }
+
+    // The size of the input should be right (divisible by BLOCK_SZ), because is an
+    // aes256 encrypted text.
+
+    aes256_done(&ctx);
+    fclose(fd);
+    fclose(output);
+}
