@@ -18,8 +18,11 @@ $ make
 
 $ ./file-encrypter
 Usage:
-    ./file-encrypter.out -e <filename>   - For encrypting a file
-    ./file-encrypter.out -d <filename>   - For decrypting a file
+    ./file-encrypter.out -e <input> <output>  - For encrypting the contents of input to output
+    ./file-encrypter.out -d <input> <output>  - For decrypting the contents of input to output
+
+Note: Using "-" as input or output will use stdin or stdout:
+    ./file-encrypter.out -e - -               - Read from stdin and write to stdout.
 ```
 
 ### Credits
