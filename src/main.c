@@ -1,6 +1,7 @@
 
 #include <stdio.h>
-#include <ctype.h>    // For tolower()
+#include <string.h>    // For strncpy()
+#include <ctype.h>     // For tolower()
 
 #include "misc.h"
 #include "encrypt.h"
@@ -30,7 +31,6 @@ int main(int argc, char** argv) {
 
         // We don't have to worry about "-" for stdin and stdout here because we know
         // what argv's are potential arguments or file names (after -e or -d)
-        // TODO: Case p
         switch (argv[i][1]) {
             case 'e':
                 if (!dec) {
@@ -39,6 +39,7 @@ int main(int argc, char** argv) {
                     if (i + 2 >= argc) {
                         fprintf(stderr, "Not enough arguments for encrypting.\n");
                         error = 1;
+                        break;
                     }
 
                     in_filename  = argv[++i];
@@ -55,6 +56,7 @@ int main(int argc, char** argv) {
                     if (i + 2 >= argc) {
                         fprintf(stderr, "Not enough arguments for decrypting.\n");
                         error = 1;
+                        break;
                     }
 
                     in_filename  = argv[++i];
@@ -63,6 +65,18 @@ int main(int argc, char** argv) {
                     fprintf(stderr, "Can't encrypt and decrypt at the same time.\n");
                     error = 1;
                 }
+                break;
+            case 'p':
+                // Don't ask for password
+                pass_prompt = 0;
+
+                if (i + 1 >= argc) {
+                    fprintf(stderr, "Not enough arguments for password.\n");
+                    error = 1;
+                    break;
+                }
+
+                strncpy(password, argv[++i], sizeof(password));
                 break;
             case 'h':
                 error = 1;    // -h
@@ -79,6 +93,7 @@ int main(int argc, char** argv) {
         error = 1;
 
     // Wrong args
+    // TODO: -p, manpage
     if (error)
         die("Usage:\n"
             "    %s -h                   - Show this help\n"
