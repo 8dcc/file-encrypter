@@ -5,8 +5,6 @@
 #include "misc.h"
 #include "encrypt.h"
 
-#define OUTPUT_FILE "output.txt"
-
 static inline void password_prompt(char* dst) {
     printf("Password: ");
     fgets(dst, 255, stdin);
@@ -22,11 +20,15 @@ static inline void password_prompt(char* dst) {
 
 int main(int argc, char** argv) {
     // Not enough args
-    if (argc < 3)
+    if (argc < 4)
         die("Usage:\n"
-            "    %s -e <filename>   - For encrypting a file\n"
-            "    %s -d <filename>   - For decrypting a file\n",
-            argv[0], argv[0]);
+            "    %s -e <input> <output>  - For encrypting the contents of input to "
+            "output\n"
+            "    %s -d <input> <output>  - For decrypting the contents of input to "
+            "output\n\n"
+            "Note: Using \"-\" as input or output will use stdin or stdout:\n"
+            "    %s -e - -               - Read from stdin and write to stdout.\n",
+            argv[0], argv[0], argv[0]);
 
     // Not -e or -d
     if (argv[1][0] != '-')
@@ -38,11 +40,11 @@ int main(int argc, char** argv) {
     switch (tolower(argv[1][1])) {
         case 'e':
             password_prompt(password);
-            encrypt_file(argv[2], OUTPUT_FILE, password);
+            encrypt_file(argv[2], argv[3], password);
             break;
         case 'd':
             password_prompt(password);
-            decrypt_file(argv[2], OUTPUT_FILE, password);
+            decrypt_file(argv[2], argv[3], password);
             break;
         default:
             die("Error. Unknown parameter: \"%s\"\n", argv[1]);

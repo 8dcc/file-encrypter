@@ -5,7 +5,7 @@
  */
 
 #include <stdio.h>
-#include <string.h>    // For memcpy()
+#include <string.h>    // For memcpy(), strcmp()
 
 #include "lib/md5.h"    // Need to include md5 first because of uint8_t define in aes
 #include "lib/aes256.h"
@@ -143,19 +143,27 @@ void decrypt_stream(FILE* in, FILE* out, char* password) {
 
 /* Wrappers for encrypt_stream and decrypt_stream */
 void encrypt_file(char* in_filename, char* out_filename, char* password) {
-    FILE* in = fopen(in_filename, "r");
-    if (!in)
-        die("Error. Can't open input file: \"%s\"\n", in_filename);
+    FILE* in  = stdin;
+    FILE* out = stdout;
 
-    // Clear output file
-    FILE* out = fopen(out_filename, "w");
-    if (!out)
-        die("Error. Can't open output file: \"%s\"\n", out_filename);
-    fclose(out);
+    // Use stdin and stdout by default, only change if filename is not "-"
+    if (strcmp(in_filename, "-") != 0) {
+        in = fopen(in_filename, "r");
+        if (!in)
+            die("Error. Can't open input file: \"%s\"\n", in_filename);
+    }
 
-    out = fopen(out_filename, "a");
-    if (!out)
-        die("Error. Can't open output file: \"%s\"\n", out_filename);
+    if (strcmp(out_filename, "-") != 0) {
+        // Clear output file
+        out = fopen(out_filename, "w");
+        if (!out)
+            die("Error. Can't open output file: \"%s\"\n", out_filename);
+        fclose(out);
+
+        out = fopen(out_filename, "a");
+        if (!out)
+            die("Error. Can't open output file: \"%s\"\n", out_filename);
+    }
 
     encrypt_stream(in, out, password);
 
@@ -164,19 +172,27 @@ void encrypt_file(char* in_filename, char* out_filename, char* password) {
 }
 
 void decrypt_file(char* in_filename, char* out_filename, char* password) {
-    FILE* in = fopen(in_filename, "r");
-    if (!in)
-        die("Error. Can't open input file: \"%s\"\n", in_filename);
+    FILE* in  = stdin;
+    FILE* out = stdout;
 
-    // Clear output file
-    FILE* out = fopen(out_filename, "w");
-    if (!out)
-        die("Error. Can't open output file: \"%s\"\n", out_filename);
-    fclose(out);
+    // Use stdin and stdout by default, only change if filename is not "-"
+    if (strcmp(in_filename, "-") != 0) {
+        in = fopen(in_filename, "r");
+        if (!in)
+            die("Error. Can't open input file: \"%s\"\n", in_filename);
+    }
 
-    out = fopen(out_filename, "a");
-    if (!out)
-        die("Error. Can't open output file: \"%s\"\n", out_filename);
+    if (strcmp(out_filename, "-") != 0) {
+        // Clear output file
+        out = fopen(out_filename, "w");
+        if (!out)
+            die("Error. Can't open output file: \"%s\"\n", out_filename);
+        fclose(out);
+
+        out = fopen(out_filename, "a");
+        if (!out)
+            die("Error. Can't open output file: \"%s\"\n", out_filename);
+    }
 
     decrypt_stream(in, out, password);
 
