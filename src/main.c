@@ -19,36 +19,84 @@ static inline void password_prompt(char* dst) {
 }
 
 int main(int argc, char** argv) {
-    // Not enough args
-    if (argc < 4)
+    char *in_filename, *out_filename;
+    char password[255] = { 0 };
+
+    // Read arguments
+    int enc = 0, dec = 0, pass_prompt = 1, error = 0;
+    for (int i = 1; i < argc; i++) {
+        if (argv[i][0] != '-')
+            continue;
+
+        // We don't have to worry about "-" for stdin and stdout here because we know
+        // what argv's are potential arguments or file names (after -e or -d)
+        // TODO: Case p
+        switch (argv[i][1]) {
+            case 'e':
+                if (!dec) {
+                    enc = 1;
+
+                    if (i + 2 >= argc) {
+                        fprintf(stderr, "Not enough arguments for encrypting.\n");
+                        error = 1;
+                    }
+
+                    in_filename  = argv[++i];
+                    out_filename = argv[++i];
+                } else {
+                    fprintf(stderr, "Can't encrypt and decrypt at the same time.\n");
+                    error = 1;
+                }
+                break;
+            case 'd':
+                if (!enc) {
+                    dec = 1;
+
+                    if (i + 2 >= argc) {
+                        fprintf(stderr, "Not enough arguments for decrypting.\n");
+                        error = 1;
+                    }
+
+                    in_filename  = argv[++i];
+                    out_filename = argv[++i];
+                } else {
+                    fprintf(stderr, "Can't encrypt and decrypt at the same time.\n");
+                    error = 1;
+                }
+                break;
+            case 'h':
+                error = 1;    // -h
+                break;
+            default:
+                fprintf(stderr, "Unknown option: \'%c\'.\n", argv[i][1]);
+                error = 1;
+                break;
+        }
+    }
+
+    // The program needs to do something
+    if (!dec && !enc)
+        error = 1;
+
+    // Wrong args
+    if (error)
         die("Usage:\n"
+            "    %s -h                   - Show this help\n"
             "    %s -e <input> <output>  - For encrypting the contents of input to "
             "output\n"
             "    %s -d <input> <output>  - For decrypting the contents of input to "
             "output\n\n"
             "Note: Using \"-\" as input or output will use stdin or stdout:\n"
-            "    %s -e - -               - Read from stdin and write to stdout.\n",
-            argv[0], argv[0], argv[0]);
+            "    %s -e - -               - Read from stdin and write to stdout\n",
+            argv[0], argv[0], argv[0], argv[0]);
 
-    // Not -e or -d
-    if (argv[1][0] != '-')
-        die("Error. Unknown parameter: \"%s\"\n", argv[1]);
+    if (pass_prompt)
+        password_prompt(password);
 
-    char password[255] = { 0 };
-
-    // Check first param
-    switch (tolower(argv[1][1])) {
-        case 'e':
-            password_prompt(password);
-            encrypt_file(argv[2], argv[3], password);
-            break;
-        case 'd':
-            password_prompt(password);
-            decrypt_file(argv[2], argv[3], password);
-            break;
-        default:
-            die("Error. Unknown parameter: \"%s\"\n", argv[1]);
-    }
+    if (enc)
+        encrypt_file(in_filename, out_filename, password);
+    else if (dec)
+        decrypt_file(in_filename, out_filename, password);
 
     return 0;
 }
