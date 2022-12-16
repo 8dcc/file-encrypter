@@ -6,7 +6,7 @@ LIB_OBJS=obj/lib/aes256.o obj/lib/md5.o
 OBJS=obj/main.o obj/encrypt.o obj/misc.o
 BIN=file-encrypter.out
 
-.PHONY: all run clean
+.PHONY: all run clean install uninstall
 
 all: $(BIN)
 
@@ -33,4 +33,12 @@ $(LIB_OBJS): obj/lib/%.o : src/lib/%.c
 clean:
 	rm -f $(OBJS) $(BIN)
 
-# TODO: Install and uninstall
+install: $(BIN)
+	install --mode=0755 $< /usr/local/bin/
+	mkdir -p /usr/local/share/man/man1/
+	install --mode=0644 file-encrypter.1 /usr/local/share/man/man1/
+
+uninstall: $(BIN)
+	rm -f /usr/local/bin/$<
+	rm -f /usr/local/share/man/man1/file-encrypter.1
+
