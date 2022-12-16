@@ -15,8 +15,16 @@ $ git clone https://github.com/r4v10l1/file-encrypter
 $ cd file-encrypter
 
 $ make
+...
 
 $ ./file-encrypter -h
+...
+```
+
+### Installing
+For adding the program to the path and installing the manpage, run:
+```console
+$ sudo make install
 ...
 ```
 
