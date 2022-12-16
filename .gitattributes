@@ -1,2 +1,5 @@
 # Don't detect lib code for language detection
 /src/lib/* linguist-detectable=false
+
+# Manpage
+*.1 linguist-detectable=false
