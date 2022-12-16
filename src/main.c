@@ -79,7 +79,11 @@ int main(int argc, char** argv) {
                 strncpy(password, argv[++i], sizeof(password));
                 break;
             case 'h':
-                error = 1;    // -h
+                error = 1;    // "-h"
+                break;
+            case '\0':    // "-", no other char
+                fprintf(stderr, "Unknown option: \' \'.\n");
+                error = 1;
                 break;
             default:
                 fprintf(stderr, "Unknown option: \'%c\'.\n", argv[i][1]);
