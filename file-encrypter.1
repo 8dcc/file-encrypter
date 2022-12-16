@@ -1,0 +1,70 @@
+.TH file-encrypter 1 16-Dec-2022
+.SH NAME
+file-encrypter \- encrypt and decrypt files using aes256
+.SH SYNOPSIS
+.B file-encrypter
+.RB [ \-h ]
+.RB [ \-p
+.IR password ]
+.BR \-e\c
+.RB |\c
+.BR \-d
+.IR input\~output
+.PP
+.SH OPTIONS
+.TP
+.BI \-h
+Show this help.
+.TP
+.BI \-p " password"
+Use
+.I password
+when encrypting or decrypting the file, instead of asking for one
+.TP
+.BI \-e " input output"
+Encrypts data from
+.IR input
+and writes to
+.IR output .
+They can be file names or in the case of '-' it will read/write from
+.BR stdin
+and
+.BR stdout .
+Keep in mind that if you don't use
+.BR \-p ,
+it will try to read the password from
+.BR stdin
+as well.
+.TP
+.BI \-d " input output"
+Decrypts data from
+.IR input
+and writes to
+.IR output .
+Just like with
+.BR \-e ,
+they can be file names or in the case of '-' it will read/write from
+.BR stdin
+and
+.BR stdout .
+.SH EXAMPLES
+.TP
+file-encrypter \-e input.txt output.txt
+Will encrypt the contents of
+.BR input.txt
+and write them to
+.BR output.txt .
+.TP
+file-encrypter \-p "t3st!" \-d input.txt output.txt
+Will decrypt the contents of
+.BR input.txt
+using "t3st!" as password and write them to
+.BR output.txt .
+.TP
+cat some-stuff.txt | file-encrypter \-p "my-p4ss" \-e - output.txt
+Will encrypt the contents of
+.BR stdin
+(in this case what he got from the cat(1) pipe) using "my-p4ss" as password and write them to
+.BR output.txt .
+.SH LICENSE
+See the LICENSE file for the terms of redistribution.
