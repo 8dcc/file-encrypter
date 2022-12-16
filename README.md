@@ -17,7 +17,7 @@ $ cd file-encrypter
 $ make
 ...
 
-$ ./file-encrypter -h
+$ ./file-encrypter.out -h
 ...
 ```
 
@@ -25,6 +25,9 @@ $ ./file-encrypter -h
 For adding the program to the path and installing the manpage, run:
 ```console
 $ sudo make install
+...
+
+$ man file-encrypter  # Or file-encrypter -h
 ...
 ```
 
