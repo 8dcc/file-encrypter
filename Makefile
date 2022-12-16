@@ -32,3 +32,5 @@ $(LIB_OBJS): obj/lib/%.o : src/lib/%.c
 
 clean:
 	rm -f $(OBJS) $(BIN)
+
+# TODO: Install and uninstall

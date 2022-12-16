@@ -93,17 +93,54 @@ int main(int argc, char** argv) {
         error = 1;
 
     // Wrong args
-    // TODO: -p, manpage
     if (error)
-        die("Usage:\n"
-            "    %s -h                   - Show this help\n"
-            "    %s -e <input> <output>  - For encrypting the contents of input to "
-            "output\n"
-            "    %s -d <input> <output>  - For decrypting the contents of input to "
-            "output\n\n"
-            "Note: Using \"-\" as input or output will use stdin or stdout:\n"
-            "    %s -e - -               - Read from stdin and write to stdout\n",
-            argv[0], argv[0], argv[0], argv[0]);
+        die("SYNOPSIS\n"
+            "       %s [-h] [-p password] -e|-d input output\n"
+            "\n"
+            "OPTIONS\n"
+            "       -h     Show this help.\n"
+            "\n"
+            "       -p password\n"
+            "              Use  password when encrypting or decrypting the file, "
+            "instead of\n"
+            "              asking for one\n"
+            "\n"
+            "       -e input output\n"
+            "              Encrypts data from input and writes to output.  They can "
+            "be file\n"
+            "              names  or  in  the case of '-' it will read/write from "
+            "stdin and\n"
+            "              stdout.  Keep in mind that if you don't use -p, it will  "
+            "try  to\n"
+            "              read the password from stdin as well.\n"
+            "\n"
+            "       -d input output\n"
+            "              Decrypts  data  from input and writes to output.  Just "
+            "like with\n"
+            "              -e, they can be file names  or  in  the  case  of  '-'  "
+            "it  will\n"
+            "              read/write from stdin and stdout.\n"
+
+            "\n"
+            "EXAMPLES\n"
+            "       file-encrypter -e input.txt output.txt\n"
+            "              Will  encrypt  the  contents of input.txt and write them "
+            "to out-\n"
+            "              put.txt.\n"
+            "\n"
+            "       file-encrypter -p \"t3st!\" -d input.txt output.txt\n"
+            "              Will decrypt the contents of input.txt using \"t3st!\" "
+            "as password\n"
+            "              and write them to output.txt.\n"
+            "\n"
+            "       cat some-stuff.txt | file-encrypter -p \"my-p4ss\" -e - "
+            "output.txt\n"
+            "              Will  encrypt  the  contents  of stdin (in this case "
+            "what he got\n"
+            "              from the cat(1) pipe) using \"my-p4ss\" as password and "
+            "write them\n"
+            "              to output.txt.\n",
+            argv[0]);
 
     if (pass_prompt)
         password_prompt(password);
