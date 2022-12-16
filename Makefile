@@ -34,11 +34,11 @@ clean:
 	rm -f $(OBJS) $(BIN)
 
 install: $(BIN)
-	install --mode=0755 $< /usr/local/bin/
+	install --mode=0755 $< /usr/local/bin/file-encrypter
 	mkdir -p /usr/local/share/man/man1/
 	install --mode=0644 file-encrypter.1 /usr/local/share/man/man1/
 
 uninstall: $(BIN)
-	rm -f /usr/local/bin/$<
+	rm -f /usr/local/bin/file-encrypter
 	rm -f /usr/local/share/man/man1/file-encrypter.1
 
